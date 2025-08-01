@@ -7,6 +7,7 @@ import Mathlib.Algebra.BigOperators.Ring.Finset
 import Mathlib.Algebra.Order.AbsoluteValue.Basic
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Algebra.Order.BigOperators.Ring.Multiset
+import Mathlib.Data.Real.Basic
 import Mathlib.Tactic.Ring
 
 /-!
@@ -225,6 +226,30 @@ theorem sq_sum_div_le_sum_sq_div [Semifield R] [LinearOrder R] [IsStrictOrderedR
     (sum_sq_le_sum_mul_sum_of_sq_eq_mul _ H hg' fun i hi ↦ ?_)
   rw [div_mul_cancel₀]
   exact (hg i hi).ne'
+
+/-- **Titu's lemma** (an alias for `sq_sum_div_le_sum_sq_div`). -/
+theorem titu_lemma [Semifield R] [LinearOrder R] [IsStrictOrderedRing R]
+    [ExistsAddOfLE R] (s : Finset ι)
+    (f : ι → R) {g : ι → R} (hg : ∀ i ∈ s, 0 < g i) :
+    (∑ i ∈ s, f i) ^ 2 / ∑ i ∈ s, g i ≤ ∑ i ∈ s, f i ^ 2 / g i :=
+  sq_sum_div_le_sum_sq_div s f hg
+
+namespace Real
+
+/-- **Titu's lemma** specialized for real numbers. For positive reals `g i`,
+we have `(∑ f i)² / (∑ g i) ≤ ∑ (f i² / g i)`.
+
+This is often written as: for positive reals `aᵢ` and `bᵢ`,
+`(a₁ + a₂ + ... + aₙ)² / (b₁ + b₂ + ... + bₙ) ≤ a₁²/b₁ + a₂²/b₂ + ... + aₙ²/bₙ`.
+
+## Example
+For `f = [1, 2]` and `g = [1, 1]`, we get:
+`(1 + 2)² / (1 + 1) = 9/2 = 4.5 ≤ 1²/1 + 2²/1 = 1 + 4 = 5`. -/
+theorem titu_lemma (s : Finset ι) (f : ι → ℝ) {g : ι → ℝ} (hg : ∀ i ∈ s, 0 < g i) :
+    (∑ i ∈ s, f i) ^ 2 / ∑ i ∈ s, g i ≤ ∑ i ∈ s, f i ^ 2 / g i :=
+  Finset.sq_sum_div_le_sum_sq_div s f hg
+
+end Real
 
 end Finset
 
