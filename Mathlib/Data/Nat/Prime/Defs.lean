@@ -426,6 +426,27 @@ theorem Prime.dvd_mul {p m n : ℕ} (pp : Prime p) : p ∣ m * n ↔ p ∣ m ∨
   ⟨fun H => or_iff_not_imp_left.2 fun h => (pp.coprime_iff_not_dvd.2 h).dvd_of_dvd_mul_left H,
     Or.rec (fun h : p ∣ m => h.mul_right _) fun h : p ∣ n => h.mul_left _⟩
 
+theorem Prime.not_dvd_mul {p m n : ℕ} (pp : Prime p) (hm : ¬ p ∣ m) (hn : ¬ p ∣ n) :
+    ¬ p ∣ m * n :=
+  pp.dvd_mul.not.mpr <| not_or.mpr ⟨hm, hn⟩
+
+theorem Prime.dvd_lcm {p m n : ℕ} (pp : Prime p) : p ∣ lcm m n ↔ p ∣ m ∨ p ∣ n := by
+  constructor
+  · intro h
+    -- Use the fact that gcd(m,n) * lcm(m,n) = m * n
+    -- If p ∣ lcm(m,n), then by properties of primes we can show p ∣ m ∨ p ∣ n
+    have : p ∣ m * n := by
+      rw [← Nat.gcd_mul_lcm m n]
+      exact dvd_mul_of_dvd_right h (gcd m n)
+    exact pp.dvd_mul.mp this
+  · rintro (h | h)
+    · exact dvd_trans h (dvd_lcm_left m n)
+    · exact dvd_trans h (dvd_lcm_right m n)
+
+theorem Prime.not_dvd_lcm {p m n : ℕ} (pp : Prime p) (hm : ¬ p ∣ m) (hn : ¬ p ∣ n) :
+    ¬ p ∣ lcm m n :=
+  pp.dvd_lcm.not.mpr <| not_or.mpr ⟨hm, hn⟩
+
 theorem prime_iff {p : ℕ} : p.Prime ↔ _root_.Prime p :=
   ⟨fun h => ⟨h.ne_zero, h.not_isUnit, fun _ _ => h.dvd_mul.mp⟩, Prime.irreducible⟩
 
