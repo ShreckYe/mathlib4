@@ -10,7 +10,7 @@ import Mathlib.Data.Finset.Erase
 import Mathlib.Data.Finset.Filter
 import Mathlib.Data.Finset.Range
 import Mathlib.Data.Finset.SDiff
-import Mathlib.Data.Fintype
+import Mathlib.Data.Fintype.Defs
 
 /-! # Image and map operations on finite sets
 
