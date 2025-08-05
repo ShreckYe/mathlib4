@@ -10,6 +10,7 @@ import Mathlib.Data.Finset.Erase
 import Mathlib.Data.Finset.Filter
 import Mathlib.Data.Finset.Range
 import Mathlib.Data.Finset.SDiff
+import Mathlib.Data.Fintype
 
 /-! # Image and map operations on finite sets
 
@@ -392,8 +393,8 @@ theorem coe_image_subset_range : ↑(s.image f) ⊆ Set.range f :=
     ↑(s.image f) = f '' ↑s := coe_image
     _ ⊆ Set.range f := Set.image_subset_range f ↑s
 
-theorem subset_range_iff_exists_image_eq {f : α → β} {s : Finset β} :
-    (s : Set β) ⊆ Set.range f ↔ ∃ t : Finset α, t.image f = s :=
+theorem subset_univ_image_iff_exists_image_eq [Fintype α] {f : α → β} {s : Finset β} :
+    s ⊆ univ.image f ↔ ∃ t : Finset α, t.image f = s :=
   sorry
 
 theorem filter_image {p : β → Prop} [DecidablePred p] :
