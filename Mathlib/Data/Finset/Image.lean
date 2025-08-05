@@ -392,6 +392,11 @@ theorem coe_image_subset_range : ↑(s.image f) ⊆ Set.range f :=
     ↑(s.image f) = f '' ↑s := coe_image
     _ ⊆ Set.range f := Set.image_subset_range f ↑s
 
+/-- A finset is a subset of the range of a function iff it's the image of some finset. -/
+theorem subset_range_iff_exists_image_eq {f : α → β} {s : Finset β} [DecidableEq α] :
+    (s : Set β) ⊆ Set.range f ↔ ∃ t : Finset α, t.image f = s :=
+  sorry -- TODO: Complete the proof
+
 theorem filter_image {p : β → Prop} [DecidablePred p] :
     (s.image f).filter p = (s.filter fun a ↦ p (f a)).image f := by grind
 
