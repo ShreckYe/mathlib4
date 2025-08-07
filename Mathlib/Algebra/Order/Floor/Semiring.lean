@@ -350,10 +350,9 @@ lemma ceil_lt_add_one' [Neg R] (ha : -1 < a) : ⌈a⌉₊ < a + 1 := by
       ceil_eq_zero.mpr (le_of_not_ge h)
     rw [this]
     norm_cast
-    suffices -1 + 1 < a + 1 by
-      convert this
-      sorry
-    gcongr
+    calc 0
+      = -1 + 1   := by sorry
+    _ < a + 1    := by gcongr
 
 @[bound]
 theorem ceil_add_le (a b : R) : ⌈a + b⌉₊ ≤ ⌈a⌉₊ + ⌈b⌉₊ := by
