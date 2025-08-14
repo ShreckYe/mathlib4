@@ -54,10 +54,11 @@ theorem IsPrimePow.pow {n : R} (hn : IsPrimePow n) {k : ℕ} (hk : k ≠ 0) : Is
   ⟨p, k * k', hp, mul_pos hk.bot_lt hk', by rw [pow_mul', hn]⟩
 
 /-
-A single quote added (primed) to temporarily distinguish from `Nat.isPrimePow_pow_iff`
+A single quote added (primed) to temporarily distinguish from
+the old version of `Nat.isPrimePow_pow_iff'`, `isPrimePow_pow_iff'`, when `IsPrimePow` is opened,
 in order not to break compatibility.
 The single quote can be removed
-and this primed version can be deprecated and delegated to the new one
+and this primed version can be deprecated and delegate to the new one
 once the deprecation period of that theorem is over.
 -/
 theorem IsPrimePow.isPrimePow_pow_iff' {n : R} {k : ℕ} (hk : k ≠ 0) :

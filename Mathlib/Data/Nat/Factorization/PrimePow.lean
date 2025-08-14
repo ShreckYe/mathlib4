@@ -75,9 +75,18 @@ theorem exists_ordCompl_eq_one_iff_isPrimePow {n : ℕ} (hn : n ≠ 1) :
   contrapose! hn
   simp [Nat.le_zero.1 hn]
 
+/-
+A single quote added (primed) to temporarily distinguish from
+the old version `isPrimePow_iff_unique_prime_dvd` when `Nat` is opened,
+in order not to break compatibility.
+The single quote can be removed
+and this primed version can be deprecated and delegate to the new one
+once the deprecation period of that theorem is over.
+-/
 /-- An equivalent definition for prime powers: `n` is a prime power iff there is a unique prime
 dividing it. -/
-theorem Nat.isPrimePow_iff_unique_prime_dvd {n : ℕ} : IsPrimePow n ↔ ∃! p : ℕ, p.Prime ∧ p ∣ n := by
+theorem Nat.isPrimePow_iff_unique_prime_dvd' {n : ℕ} :
+    IsPrimePow n ↔ ∃! p : ℕ, p.Prime ∧ p ∣ n := by
   rw [isPrimePow_nat_iff]
   constructor
   · rintro ⟨p, k, hp, hk, rfl⟩
@@ -98,16 +107,25 @@ theorem Nat.isPrimePow_iff_unique_prime_dvd {n : ℕ} : IsPrimePow n ↔ ∃! p 
   cases hq _ hq'.1 hq'.2
   simp
 
-@[deprecated (since := "2025-??-??")] alias isPrimePow_iff_unique_prime_dvd := Nat.isPrimePow_iff_unique_prime_dvd
+@[deprecated (since := "2025-??-??")]
+alias isPrimePow_iff_unique_prime_dvd := Nat.isPrimePow_iff_unique_prime_dvd'
 
-theorem Nat.isPrimePow_pow_iff {n k : ℕ} (hk : k ≠ 0) : IsPrimePow (n ^ k) ↔ IsPrimePow n := by
+/-
+A single quote added (primed) to temporarily distinguish from
+the old version `isPrimePow_pow_iff` when `Nat` is opened,
+in order not to break compatibility.
+The single quote can be removed
+and this primed version can be deprecated and delegate to the new one
+once the deprecation period of that theorem is over.
+-/
+theorem Nat.isPrimePow_pow_iff' {n k : ℕ} (hk : k ≠ 0) : IsPrimePow (n ^ k) ↔ IsPrimePow n := by
   simp only [isPrimePow_iff_unique_prime_dvd]
   apply existsUnique_congr
   simp only [and_congr_right_iff]
   intro p hp
   exact ⟨hp.dvd_of_dvd_pow, fun t => t.trans (dvd_pow_self _ hk)⟩
 
-@[deprecated (since := "2025-??-??")] alias isPrimePow_pow_iff := Nat.isPrimePow_pow_iff
+@[deprecated (since := "2025-??-??")] alias isPrimePow_pow_iff := Nat.isPrimePow_pow_iff'
 
 theorem Nat.Coprime.isPrimePow_dvd_mul {n a b : ℕ} (hab : Nat.Coprime a b) (hn : IsPrimePow n) :
     n ∣ a * b ↔ n ∣ a ∨ n ∣ b := by
