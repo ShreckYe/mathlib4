@@ -8,28 +8,33 @@ variable {α : Type*}
 theorem Prime.factorization_pow {p : α} (hp : Prime p) : factorization (p ^ m) = (fun₀ | p => m) := by
   sorry
 
-theorem m_eq_a_factorization_p_of_prime_p_of_p_pow_eq_pow
-    {p a : α} {m n : ℕ} (hp : Prime p) (h : p ^ m = a ^ n) : m = n * factorization a p := by
+section PrimePowEqPow
+variable {p a : α} {m n : ℕ} (hp : Prime p) (hn : n ≠ 0) (h : p ^ m = a ^ n)
+include hp h
+
+theorem m_eq_n_mul_a_factorization_p_of_prime_p_of_p_pow_m_eq_a_pow_n :
+    m = n * factorization a p := by
   have := congrArg factorization h
   rw [Prime.factorization_pow hp, factorization_pow] at this
   have := congrFun (congrArg DFunLike.coe this) p
   simp at this
   exact this
 
-theorem exponent_dvd_of_prime_pow_eq_pow
-    {p a : α} {m n : ℕ} (hp : Prime p) (h : p ^ m = a ^ n) : n ∣ m := by
-  exact Dvd.intro (factorization a p) (m_eq_a_factorization_p_of_prime_p_of_p_pow_eq_pow hp h).symm
+theorem exponent_dvd_of_prime_pow_eq_pow : n ∣ m := by
+  exact Dvd.intro (factorization a p)
+    (m_eq_n_mul_a_factorization_p_of_prime_p_of_p_pow_m_eq_a_pow_n hp h).symm
 
-theorem exists_k_base_eq_p_pow_k_of_prime_p_pow_eq_base_pow
-    [IsMulTorsionFree α] {p a : α} {m n : ℕ} (hp : Prime p) (hn : n ≠ 0) (h : p ^ m = a ^ n) :
-    ∃ k, a = p ^ k := by
+include hn
+theorem exists_k_base_eq_p_pow_k_of_prime_p_pow_eq_base_pow [IsMulTorsionFree α] : ∃ k, a = p ^ k := by
   rcases exponent_dvd_of_prime_pow_eq_pow hp h with ⟨k, m_eq⟩
   rw [m_eq, pow_mul'] at h
   use k, pow_left_injective hn h.symm
 
+end PrimePowEqPow
+
 theorem eq_of_factorization_eq' {a b : ℕ} (ha : a ≠ 0) (hb : b ≠ 0)
-    (h : factorization a = factorization b) : a = b := by
-  sorry --exact eq_of_factorization_eq ha hb (congrFun (congrArg DFunLike.coe h))
+    (h : factorization a = factorization b) : a = b :=
+  sorry --eq_of_factorization_eq ha hb (congrFun (congrArg DFunLike.coe h))
 
 theorem exists_eq_pow_of_exponent_coprime_of_pow_eq_pow
     {a b m n : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) (hmn : m.Coprime n) (h : a ^ m = b ^ n) :
