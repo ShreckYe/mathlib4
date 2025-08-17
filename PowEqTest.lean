@@ -20,8 +20,8 @@ theorem m_eq_n_mul_a_factorization_p_of_prime_p_of_p_pow_m_eq_a_pow_n :
   simp at this
   exact this
 
-theorem exponent_dvd_of_prime_pow_eq_pow : n ∣ m := by
-  exact Dvd.intro (factorization a p)
+theorem exponent_dvd_of_prime_pow_eq_pow : n ∣ m :=
+  Dvd.intro (factorization a p)
     (m_eq_n_mul_a_factorization_p_of_prime_p_of_p_pow_m_eq_a_pow_n hp h).symm
 
 include hn
