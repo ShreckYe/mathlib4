@@ -126,7 +126,7 @@ theorem eq_of_factorization_eq' {a b : ℕ} (ha : a ≠ 0) (hb : b ≠ 0)
     (h : factorization a = factorization b) : a = b := by
   sorry --exact eq_of_factorization_eq ha hb (congrFun (congrArg DFunLike.coe h))
 
-theorem exists_eq_pow_of_exponent_coprime_of_pow_eq
+theorem exists_eq_pow_of_exponent_coprime_of_pow_eq_pow
     {a b m n : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) (hmn : m.Coprime n) (h : a ^ m = b ^ n) :
     ∃ c, a = c ^ n ∧ b = c ^ m := by
   by_cases hn : n = 0
@@ -174,7 +174,8 @@ theorem exists_eq_pow_of_exponent_coprime_of_pow_eq
     rw [afp_eq, Nat.mul_left_comm m n k] at mul_factorization_p_eq
     exact Nat.mul_left_cancel n_pos mul_factorization_p_eq.symm
 
-theorem exists_eq_pow_of_pow_eq {a b m n : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) (hmn : m ≠ 0 ∨ n ≠ 0) (h : a ^ m = b ^ n) :
+theorem exists_eq_pow_of_pow_eq_pow
+    {a b m n : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) (hmn : m ≠ 0 ∨ n ≠ 0) (h : a ^ m = b ^ n) :
     let g := gcd m n; ∃ c, a = c ^ (n / g) ∧ b = c ^ (m / g) := by
   intro g
   let m' := m / gcd m n
@@ -192,5 +193,6 @@ theorem exists_eq_pow_of_pow_eq {a b m n : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) (h
       · exact gcd_ne_zero_left hm
       · exact gcd_ne_zero_right hn
     exact pow_left_injective this h
+  exact exists_eq_pow_of_exponent_coprime_of_pow_eq_pow ha hb coprime pow_eq
 
 end UniqueFactorizationMonoid
