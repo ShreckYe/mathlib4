@@ -12,7 +12,7 @@ section PrimePowEqPow
 variable {p a : α} {m n : ℕ} (hp : Prime p) (hn : n ≠ 0) (h : p ^ m = a ^ n)
 include hp h
 
-theorem m_eq_n_mul_a_factorization_p_of_prime_p_of_p_pow_m_eq_a_pow_n :
+theorem m_eq_n_mul_factorization_a_p_of_prime_p_of_p_pow_m_eq_a_pow_n :
     m = n * factorization a p := by
   have := congrArg factorization h
   rw [Prime.factorization_pow hp, factorization_pow] at this
@@ -22,7 +22,7 @@ theorem m_eq_n_mul_a_factorization_p_of_prime_p_of_p_pow_m_eq_a_pow_n :
 
 theorem exponent_dvd_of_prime_pow_eq_pow : n ∣ m :=
   Dvd.intro (factorization a p)
-    (m_eq_n_mul_a_factorization_p_of_prime_p_of_p_pow_m_eq_a_pow_n hp h).symm
+    (m_eq_n_mul_factorization_a_p_of_prime_p_of_p_pow_m_eq_a_pow_n hp h).symm
 
 include hn
 theorem exists_k_base_eq_p_pow_k_of_prime_p_pow_eq_base_pow
