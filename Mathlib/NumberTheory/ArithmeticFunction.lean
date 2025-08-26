@@ -941,11 +941,14 @@ lemma cardFactors_pow {m k : ℕ} : Ω (m ^ k) = k * Ω m := by
 theorem cardFactors_apply_prime_pow {p k : ℕ} (hp : p.Prime) : Ω (p ^ k) = k := by
   simp [cardFactors_pow, hp]
 
+-- First, let me establish that the functions are equal
+lemma sum_id_eq_sum_snd (f : ℕ →₀ ℕ) : f.sum (fun _ ↦ id) = f.sum (fun _ k => k) := rfl
+
 @[simp]
 theorem cardFactors_eq_factorization_sum_exponent {n : ℕ} :
     Ω n = n.factorization.sum fun _ k => k := by
   rw [cardFactors_apply, ← Multiset.coe_card, factorization_eq_primeFactorsList_multiset,
-    ← Multiset.toFinsupp_sum_eq]
+    ← sum_id_eq_sum_snd, ← Multiset.toFinsupp_sum_eq]
 
 /-- `ω n` is the number of distinct prime factors of `n`. -/
 def cardDistinctFactors : ArithmeticFunction ℕ :=
