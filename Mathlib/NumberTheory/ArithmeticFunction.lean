@@ -947,6 +947,7 @@ lemma sum_id_eq_sum_snd (f : ℕ →₀ ℕ) : f.sum (fun _ ↦ id) = f.sum (fun
 @[simp]
 theorem cardFactors_eq_factorization_sum_exponent {n : ℕ} :
     Ω n = n.factorization.sum fun _ k => k := by
+  classical
   rw [cardFactors_apply, ← Multiset.coe_card, factorization_eq_primeFactorsList_multiset,
     ← sum_id_eq_sum_snd, ← Multiset.toFinsupp_sum_eq]
 
