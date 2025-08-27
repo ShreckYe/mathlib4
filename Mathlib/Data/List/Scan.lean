@@ -118,8 +118,8 @@ theorem get_scanl_eq_foldl_take {i : Fin (l.length + 1)} :
     (l.scanl f b).get (i.cast (l.length_scanl b).symm) = (l.take i).foldl f b :=
   getElem_scanl_eq_foldl_take' i.isLt
 
-theorem scanl_eq_foldl_f_cons [Inhabited β] :
-    scanl f b l = foldl (fun l e => f l.head! e :: l) [b] l := by
+theorem scanl_eq_reverse_foldl_f_cons [Inhabited β] :
+    scanl f b l = (foldl (fun l e => f l.head! e :: l) [b] l).reverse := by
   induction l generalizing b
   case nil => simp
   case cons hd tl ih =>
