@@ -85,14 +85,11 @@ theorem getElem_succ_scanl {i : ℕ} (h : i + 1 < (scanl f b l).length) :
       · simp only [length, Nat.zero_add 1, succ_add_sub_one, hi]; rfl
       · simp only [length_singleton]; omega
 
-theorem get_scanl_eq_foldl_take {α β : Type*} {f : β → α → β} {a : β} (l : List α) (i : Fin (l.length + 1)) :
+theorem get_scanl_eq_foldl_take (l : List α) (i : Fin (l.length + 1)) :
     (l.scanl f a).get (i.cast (l.length_scanl a).symm) = (l.take i).foldl f a := by
   induction l generalizing i a with
   | nil => simp
-  | cons x xs ih =>
-    cases i using Fin.cases with
-    | zero => simp
-    | succ j => simp [getElem_append_right, ih]
+  | cons x xs ih => cases i using Fin.cases with | zero => simp | succ j => simp [ih]
 
 /-! ### List.scanr -/
 
