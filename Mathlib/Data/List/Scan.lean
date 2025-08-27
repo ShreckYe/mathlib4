@@ -129,6 +129,8 @@ theorem scanl_eq_reverse_foldl_f_cons [Inhabited β] :
     --rw [this]
     --dsimp [foldl_cons]
     specialize ih (b := f b hd)
+    rw [ih]
+    -- The list becomes `[f b hd, b]` in the rhs of the goal so a generalized lemma may be needed to prove this.
     sorry
 
 /-! ### List.scanr -/
