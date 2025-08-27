@@ -88,20 +88,22 @@ theorem getElem_succ_scanl {i : ℕ} (h : i + 1 < (scanl f b l).length) :
 
 theorem get_scanl_eq_foldl_take (l : List α) (i : ℕ) (h : i < (l.scanl f a).length) :
     (l.scanl f a)[i] = List.foldl f a (List.take i l) := by
-  induction l generalizing i a with
-  | nil => 
-    simp only [scanl_nil, length_singleton] at h
-    omega
-  | cons x xs ih =>
-    cases i with
-    | zero => simp only [getElem_cons_zero, scanl_cons, take_zero, foldl_nil]
-    | succ j =>
-      have hj : j < (xs.scanl f (f a x)).length := by
-        simp only [scanl_cons, singleton_append, length_append, length_singleton, length_scanl] at h
-        omega
-      rw [scanl_cons, getElem_append_right (by simp), length_singleton, Nat.succ_sub_succ_eq_sub, 
-          Nat.sub_zero, take_cons, foldl_cons]
-      exact ih hj
+  induction i generalizing l a with
+  | zero => simp [take_zero, foldl_nil]
+  | succ j ih =>
+    cases l with
+    | nil => 
+      simp only [scanl_nil, length_singleton] at h
+      omega
+    | cons x xs =>
+      simp only [scanl_cons, singleton_append, length_append, length_singleton, length_scanl] at h
+      simp only [getElem_append_right (by simp [length_singleton]), length_singleton, take_cons]
+      cases j with
+      | zero => simp [foldl_cons, foldl_nil]
+      | succ k =>
+        simp only [foldl_cons]
+        have h' : k + 1 < (xs.scanl f (f a x)).length := by omega
+        rw [ih h']
 
 /-! ### List.scanr -/
 
