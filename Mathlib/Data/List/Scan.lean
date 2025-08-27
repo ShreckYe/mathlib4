@@ -119,8 +119,17 @@ theorem get_scanl_eq_foldl_take {i : Fin (l.length + 1)} :
   getElem_scanl_eq_foldl_take' i.isLt
 
 theorem scanl_eq_foldl_f_cons [Inhabited β] :
-    scanl f b l = foldl (fun l e => f (l.head!) e :: l) [] l := by
-  sorry
+    scanl f b l = foldl (fun l e => f l.head! e :: l) [b] l := by
+  induction l generalizing b
+  case nil => simp
+  case cons hd tl ih =>
+    simp at ih ⊢
+    simp [show [b].head! = b from rfl]
+    --have : [f b hd, b] = f b hd :: [b] := by rfl
+    --rw [this]
+    --dsimp [foldl_cons]
+    specialize ih (b := f b hd)
+    sorry
 
 /-! ### List.scanr -/
 
