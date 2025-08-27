@@ -7,6 +7,7 @@ import Batteries.Data.List.Basic
 import Mathlib.Order.Basic
 import Mathlib.Data.Nat.Basic
 import Mathlib.Data.Option.Basic
+import Mathlib.Data.List.TakeDrop
 
 /-!
 # List scan
@@ -87,7 +88,19 @@ theorem getElem_succ_scanl {i : ℕ} (h : i + 1 < (scanl f b l).length) :
 
 theorem get_scanl_eq_foldl_take (l : List α) (i : ℕ) (h : i < (l.scanl f a).length) :
     (l.scanl f a)[i] = List.foldl f a (List.take i l) := by
-  sorry
+  have hi : i ≤ l.length := by
+    rw [length_scanl] at h
+    omega
+  induction l generalizing i a with
+  | nil => 
+    simp at h
+    simp [Nat.lt_one_iff.mp h]
+  | cons x xs ih =>
+    cases i with
+    | zero => simp
+    | succ j =>
+      rw [scanl_cons, getElem_cons_succ, List.take_cons_succ, List.foldl_cons]
+      apply ih
 
 /-! ### List.scanr -/
 
