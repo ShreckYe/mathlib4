@@ -118,6 +118,11 @@ theorem get_scanl_eq_foldl_take {i : Fin (l.length + 1)} :
     (l.scanl f b).get (i.cast (l.length_scanl b).symm) = (l.take i).foldl f b :=
   getElem_scanl_eq_foldl_take' i.isLt
 
+theorem scanl_eq_foldl_f_cons :
+    -- Taking the `head` from `l` seems not viable as there is no way to prove that it's non-empty.
+    scanl f b l = foldl (fun l e => f (l.head sorry) e :: l) [] l := by
+  sorry
+
 /-! ### List.scanr -/
 
 variable {f : α → β → β}
