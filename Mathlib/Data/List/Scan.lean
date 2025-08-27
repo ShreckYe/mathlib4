@@ -85,9 +85,8 @@ theorem getElem_succ_scanl {i : ℕ} (h : i + 1 < (scanl f b l).length) :
       · simp only [length, Nat.zero_add 1, succ_add_sub_one, hi]; rfl
       · simp only [length_singleton]; omega
 
--- Testing theorem for compilation
-theorem get_scanl_eq_foldl_take (l : List α) (i : Fin (l.length + 1)) :
-    (l.scanl f a).get (i.cast (l.length_scanl a).symm) = List.foldl f a (List.take i.val l) := by
+theorem get_scanl_eq_foldl_take (l : List α) (i : ℕ) (h : i < (l.scanl f a).length) :
+    (l.scanl f a)[i] = List.foldl f a (List.take i l) := by
   sorry
 
 /-! ### List.scanr -/
