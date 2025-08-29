@@ -1219,10 +1219,47 @@ variable {n} {α : (i : Fin n) → Type*}
   [∀ i, Monoid (α i)]
   {f : (i : Fin n) → α i}
 
+-- First, let's prove a general lemma about minimal period for pi types
+lemma minimalPeriod_pi_mul_left {n} {α : (i : Fin n) → Type*} [∀ i, Monoid (α i)]
+  (f : (i : Fin n) → α i) :
+  minimalPeriod (f * ·) 1 = Finset.univ.lcm (fun i => minimalPeriod (f i * ·) 1) := by
+  -- Use eq_of_forall_dvd approach similar to the product case
+  apply eq_of_forall_dvd
+  intro d
+  simp only [← isPeriodicPt_iff_minimalPeriod_dvd, Finset.dvd_lcm_iff]
+  -- Need to show: IsPeriodicPt (f * ·) d 1 ↔ ∀ i ∈ Finset.univ, IsPeriodicPt (f i * ·) d 1
+  simp only [Finset.mem_univ, true_and]
+  -- So we need: IsPeriodicPt (f * ·) d 1 ↔ ∀ i, IsPeriodicPt (f i * ·) d 1
+  constructor
+  · -- Forward direction: if f * · is periodic, then each component is periodic
+    intro h i
+    -- IsPeriodicPt (f * ·) d 1 means (f * ·)^[d] 1 = 1
+    -- Since (f * ·)^[d] 1 = f^d and equality in pi types is componentwise,
+    -- we have f^d = 1, so (f^d) i = 1, i.e., (f i)^d = 1
+    -- This is exactly IsPeriodicPt (f i * ·) d 1
+    have h_eq : f ^ d = 1 := h
+    have : (f ^ d) i = (1 : (j : Fin n) → α j) i := congr_fun h_eq i
+    simp at this
+    exact this
+  · -- Backward direction: if each component is periodic, then f * · is periodic
+    intro h
+    -- If ∀ i, IsPeriodicPt (f i * ·) d 1, then (f i)^d = 1 for all i
+    -- Since exponentiation in pi types is componentwise, this means f^d = 1
+    -- which is exactly IsPeriodicPt (f * ·) d 1
+    ext i
+    exact h i
+
 -- alternative name: `Tuple.orderOf_mk`
 @[to_additive]
 lemma Tuple.orderOf_eq : orderOf f = Finset.univ.lcm (fun i => orderOf (f i)) := by
-  sorry
+  -- Use the definition of orderOf in terms of minimalPeriod
+  rw [orderOf]
+  -- Apply our pi minimal period lemma
+  rw [minimalPeriod_pi_mul_left]
+  -- Each component orderOf is also defined via minimalPeriod
+  congr
+  ext i
+  rw [orderOf]
 
 end Tuple
 
