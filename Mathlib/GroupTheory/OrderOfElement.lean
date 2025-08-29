@@ -1223,29 +1223,16 @@ variable {n} {α : (i : Fin n) → Type*}
 lemma minimalPeriod_pi_mul_left {n} {α : (i : Fin n) → Type*} [∀ i, Monoid (α i)]
   (f : (i : Fin n) → α i) :
   minimalPeriod (f * ·) 1 = Finset.univ.lcm (fun i => minimalPeriod (f i * ·) 1) := by
-  -- Try to directly mimic the product case
   apply eq_of_forall_dvd
   intro d
   simp only [← isPeriodicPt_iff_minimalPeriod_dvd]
-  -- We need: IsPeriodicPt (f * ·) d 1 ↔ d ∣ Finset.univ.lcm (fun i => minimalPeriod (f i * ·) 1)
-  -- Expanding the right side using properties of lcm on finsets
   constructor
-  · -- IsPeriodicPt (f * ·) d 1 → d ∣ lcm
-    intro h
-    -- h : f^d = 1, so for all i, (f i)^d = 1
-    -- Therefore for all i, IsPeriodicPt (f i * ·) d 1
-    -- So for all i, d ∣ minimalPeriod (f i * ·) 1
-    -- Hence d ∣ lcm by Finset.lcm_dvd
+  · intro h
     apply Finset.lcm_dvd
     intro i _
     rw [← isPeriodicPt_iff_minimalPeriod_dvd]
     exact congr_fun h i
-  · -- d ∣ lcm → IsPeriodicPt (f * ·) d 1
-    intro h
-    -- h : d ∣ lcm, so for all i, d ∣ minimalPeriod (f i * ·) 1
-    -- Therefore for all i, IsPeriodicPt (f i * ·) d 1
-    -- So for all i, (f i)^d = 1
-    -- Hence f^d = 1, i.e., IsPeriodicPt (f * ·) d 1
+  · intro h
     ext i
     have h_i : d ∣ minimalPeriod (f i * ·) 1 := Finset.dvd_lcm (Finset.mem_univ i) h
     rwa [isPeriodicPt_iff_minimalPeriod_dvd] at h_i
@@ -1253,14 +1240,7 @@ lemma minimalPeriod_pi_mul_left {n} {α : (i : Fin n) → Type*} [∀ i, Monoid 
 -- alternative name: `Tuple.orderOf_mk`
 @[to_additive]
 lemma Tuple.orderOf_eq : orderOf f = Finset.univ.lcm (fun i => orderOf (f i)) := by
-  -- Use the definition of orderOf in terms of minimalPeriod
-  rw [orderOf]
-  -- Apply our pi minimal period lemma
-  rw [minimalPeriod_pi_mul_left]
-  -- Each component orderOf is also defined via minimalPeriod
-  congr
-  ext i
-  rw [orderOf]
+  simp only [orderOf, minimalPeriod_pi_mul_left]
 
 end Tuple
 
