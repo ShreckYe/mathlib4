@@ -17,7 +17,13 @@ namespace Fin
 theorem prod_insertNth (p : Fin n → M) : ∏ j, insertNth i x p j = x * ∏ j, p j := by
   convert prod_cons x p using 1
   apply prod_equiv
-  have : i.insertNth x p = swap (cons (α := fun _ => M) x p) := by
+  /-
+  have : i.insertNth x p = cons x p ∘ Equiv.swap 0 i := by
+    --hint
+    sorry
+   -/
+  have : i.insertNth x p ∘ Equiv.swap 0 i = cons x p := by
+    hint
     sorry
   sorry
 
