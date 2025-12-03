@@ -29,10 +29,16 @@ theorem prod_insertIdx {i} : (v.insertIdx a i).toList.prod = a * v.toList.prod :
   rw [length_val]
   exact i.is_le
 
+example {i} : (v.insertIdx a i).toList = v.toList.insertIdx i a :=
+  rfl
+
 @[to_additive (attr := simp)]
 theorem mul_prod_eraseIdx {v : List.Vector M (n + 1)} {i} :
     v.get i * (v.eraseIdx i).toList.prod = v.toList.prod := by
   apply List.mul_prod_eraseIdx
+
+example {i} : (v.eraseIdx i).toList = v.toList.eraseIdx i :=
+  rfl
 
 end CommMonoid
 
