@@ -5,3 +5,9 @@ import Mathlib
 #check UniqueFactorizationMonoid
 #check CancelMonoidWithZero
 #check Prime
+
+example (α : Type*) [CommMonoidWithZero α] [IsCancelMulZero α] : UniqueFactorizationMonoid α := by
+  --infer_instance
+  sorry
+
+#check IsCancelMulZero
