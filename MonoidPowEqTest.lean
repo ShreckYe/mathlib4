@@ -4,3 +4,4 @@ import Mathlib
 #check CommMonoid
 #check UniqueFactorizationMonoid
 #check CancelMonoidWithZero
+#check Prime
