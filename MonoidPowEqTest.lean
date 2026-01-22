@@ -11,3 +11,5 @@ example (α : Type*) [CommMonoidWithZero α] [IsCancelMulZero α] : UniqueFactor
   sorry
 
 #check IsCancelMulZero
+
+-- also check related code for $p$-adic valuation
