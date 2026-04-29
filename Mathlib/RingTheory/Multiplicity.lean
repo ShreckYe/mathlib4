@@ -748,7 +748,7 @@ theorem Prime.dvd_of_pow_eq_pow {p a : α} {m n : ℕ} (hp : Prime p) (h : p ^ m
     have := congr_arg (emultiplicity p) h
     rwa [emultiplicity_pow_self_of_prime hp, emultiplicity_pow hp] at this
   rcases eq_or_ne n 0 with rfl | hn
-  · simp at key; exact dvd_zero 0
+  · simp at key; exact key ▸ dvd_refl 0
   · have hfin : emultiplicity p a ≠ ⊤ := by
       intro htop
       simp [htop, ENat.mul_top (show (n : ℕ∞) ≠ 0 from Nat.cast_ne_zero.mpr hn)] at key
