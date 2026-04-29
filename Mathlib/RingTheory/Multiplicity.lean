@@ -735,8 +735,59 @@ theorem emultiplicity_pow_self_of_prime {p : α} (hp : Prime p) (n : ℕ) :
   emultiplicity_pow_self hp.ne_zero hp.not_unit n
 
 theorem multiplicity_pow_self_of_prime {p : α} (hp : Prime p) (n : ℕ) :
-    multiplicity p (p ^ n) = n :=
+  multiplicity p (p ^ n) = n :=
   multiplicity_pow_self hp.ne_zero hp.not_unit n
+
+theorem Prime.exponent_eq_exponent_mul_multiplicity_of_pow_eq_pow {p a : α} {m n : ℕ}
+    (hp : Prime p) (h : p ^ m = a ^ n) :
+    m = n * multiplicity p a := by
+  obtain rfl | hn := eq_or_ne n 0
+  · have hm : p ^ m = p ^ 0 := by simpa using h
+    have hm0 : m = 0 := (pow_inj_of_not_isUnit hp.not_unit hp.ne_zero).mp hm
+    simp [hm0]
+  have hemul : (m : ℕ∞) = n * emultiplicity p a := by
+    calc
+      (m : ℕ∞) = emultiplicity p (p ^ m) := by
+        simpa using (emultiplicity_pow_self_of_prime hp m).symm
+      _ = emultiplicity p (a ^ n) := by rw [h]
+      _ = n * emultiplicity p a := by
+        simp only [emultiplicity_pow, Nat.cast_eq_coe_nat, Nat.mul_comm]
+  have hfin : FiniteMultiplicity p a := by
+    refine finiteMultiplicity_iff_emultiplicity_ne_top.2 ?_
+    intro htop
+    have : (m : ℕ∞) = ⊤ := by simp [htop, hn] at hemul; exact hemul
+    simp at this
+  have hemul' : emultiplicity p a = multiplicity p a := hfin.emultiplicity_eq_multiplicity
+  exact ENat.coe_inj.mp <| by simpa [hemul', Nat.mul_comm] using hemul
+
+theorem Prime.exponent_dvd_of_pow_eq_pow {p a : α} {m n : ℕ}
+    (hp : Prime p) (h : p ^ m = a ^ n) : n ∣ m :=
+  ⟨multiplicity p a, hp.exponent_eq_exponent_mul_multiplicity_of_pow_eq_pow h⟩
+
+theorem Prime.exists_associated_pow_of_pow_eq_pow {p a : α} {m n : ℕ}
+    (hp : Prime p) (hn : n ≠ 0) (h : p ^ m = a ^ n) : ∃ k, Associated a (p ^ k) := by
+  let k := multiplicity p a
+  refine ⟨k, ?_⟩
+  obtain ⟨b, hb_eq⟩ := pow_multiplicity_dvd p a
+  have hm : m = n * k := by
+    simpa [k] using hp.exponent_eq_exponent_mul_multiplicity_of_pow_eq_pow h
+  have hpow : p ^ (n * k) = p ^ (n * k) * b ^ n := by
+    calc
+      p ^ (n * k) = p ^ m := by simp [hm]
+      _ = a ^ n := h
+      _ = (p ^ k * b) ^ n := by rw [hb_eq]
+      _ = (p ^ k) ^ n * b ^ n := by rw [mul_pow]
+      _ = p ^ (k * n) * b ^ n := by rw [pow_mul]
+      _ = p ^ (n * k) * b ^ n := by rw [Nat.mul_comm]
+  have hb : b ^ n = 1 := by
+    apply (mul_left_cancel₀ (a := p ^ (n * k)) (b := b ^ n) (c := 1) (pow_ne_zero _ hp.ne_zero))
+    simpa using hpow.symm
+  exact hb_eq ▸ associated_mul_unit_left (p ^ k) b (IsUnit.of_pow_eq_one hb hn)
+
+theorem Prime.exists_eq_pow_of_pow_eq_pow [Subsingleton αˣ] {p a : α} {m n : ℕ}
+    (hp : Prime p) (hn : n ≠ 0) (h : p ^ m = a ^ n) : ∃ k, a = p ^ k := by
+  obtain ⟨k, hk⟩ := hp.exists_associated_pow_of_pow_eq_pow hn h
+  exact ⟨k, associated_iff_eq.mp hk⟩
 
 end CancelCommMonoidWithZero
 

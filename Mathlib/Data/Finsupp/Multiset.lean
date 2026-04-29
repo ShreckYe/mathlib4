@@ -208,6 +208,40 @@ theorem coe_orderIsoMultiset_symm [DecidableEq ι] :
     ⇑(@orderIsoMultiset ι).symm = Multiset.toFinsupp :=
   rfl
 
+theorem exists_eq_nsmul_of_coprime_of_nsmul_eq_nsmul [DecidableEq ι]
+    {f g : ι →₀ ℕ} {m n : ℕ} (hmn : m.Coprime n) (h : m • f = n • g) :
+    ∃ c : ι →₀ ℕ, f = n • c ∧ g = m • c := by
+  obtain rfl | hn := eq_or_ne n 0
+  · have hm : m = 1 := by simpa [Nat.coprime_zero_right] using hmn
+    subst hm
+    exact ⟨g, by simpa using h, by simp⟩
+  obtain rfl | hm := eq_or_ne m 0
+  · have hn1 : n = 1 := by simpa [Nat.coprime_zero_left] using hmn
+    subst hn1
+    exact ⟨f, by simp, by simpa using h.symm⟩
+  let c := f.mapRange (· / n) (Nat.zero_div n)
+  refine ⟨c, ?_, ?_⟩
+  · ext a
+    have hmul : m * f a = n * g a := by
+      simpa [nsmul_eq_mul] using congr(($h) a)
+    have hdiv : n ∣ f a := by
+      refine hmn.symm.dvd_of_dvd_mul_left ?_
+      exact ⟨g a, hmul⟩
+    simp [c, Nat.mul_div_cancel' hdiv]
+  · ext a
+    have hmul : m * f a = n * g a := by
+      simpa [nsmul_eq_mul] using congr(($h) a)
+    have hdiv : n ∣ f a := by
+      refine hmn.symm.dvd_of_dvd_mul_left ?_
+      exact ⟨g a, hmul⟩
+    have hf : f a = n * c a := by
+      simp [c, Nat.mul_div_cancel' hdiv]
+    apply Nat.eq_of_mul_eq_mul_left (Nat.pos_of_ne_zero hn)
+    calc
+      n * g a = m * f a := hmul.symm
+      _ = m * (n * c a) := by rw [hf]
+      _ = n * (m * c a) := by ac_rfl
+
 theorem toMultiset_strictMono : StrictMono (@toMultiset ι) := by
   classical exact (@orderIsoMultiset ι _).strictMono
 
