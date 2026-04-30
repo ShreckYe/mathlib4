@@ -17,7 +17,7 @@ example (α : Type*) [CommMonoidWithZero α] [IsCancelMulZero α] : UniqueFactor
 #check FreeMonoid
 
 example {α : Type*}
-    [CommMonoidWithZero α] [UniqueFactorizationMonoid α] [GCDMonoid α] {a b : α} {m n : ℕ} (hmn : GCDMonoid.gcd m n = 1) (h : a ^ m = b ^ n) :
+    [CommMonoidWithZero α] [UniqueFactorizationMonoid α] [GCDMonoid α] {a b : α} {m n : ℕ} (hmn : m.gcd n = 1) (h : a ^ m = b ^ n) :
     ∃ c, a = c ^ n ∧ b = c ^ m := by
   hint
 
