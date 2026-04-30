@@ -23,3 +23,4 @@ example {α : Type*}
 
 #check CancelCommMonoid
 #check exists_associated_pow_of_mul_eq_pow
+#check Commute.pow_eq_pow_iff_of_coprime
