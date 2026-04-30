@@ -177,3 +177,154 @@ lemma pow_dvd_pow_iff_dvd {a b : R} {n : ℕ} (hn : n ≠ 0) : a ^ n ∣ b ^ n �
     ENat.mul_le_mul_left_iff (by exact_mod_cast hn) (ENat.coe_ne_top _)] at this
 
 end UniqueFactorizationMonoid
+
+/-! ## Prime power equals general power -/
+
+section PrimePowEqPow
+
+variable {α : Type*} [CommMonoidWithZero α] [IsCancelMulZero α] [WfDvdMonoid α] {p a : α} {m n : ℕ}
+
+/-- If `p` is prime and `p ^ m = a ^ n`, then `m = n * multiplicity p a`. -/
+theorem Prime.multiplicity_prime_pow_eq_pow (hp : Prime p) (h : p ^ m = a ^ n) (ha : a ≠ 0) :
+    m = n * multiplicity p a := by
+  have hfin : FiniteMultiplicity p a := FiniteMultiplicity.of_prime_left hp ha
+  have h1 : emultiplicity p (p ^ m) = m := emultiplicity_pow_self_of_prime hp m
+  have h2 : emultiplicity p (a ^ n) = n * emultiplicity p a := emultiplicity_pow hp
+  have heq : (m : ℕ∞) = n * emultiplicity p a := by
+    rw [← h1, congr_arg (emultiplicity p) h, h2]
+  rw [hfin.emultiplicity_eq_multiplicity] at heq
+  exact_mod_cast heq
+
+/-- If `p` is prime and `p ^ m = a ^ n`, then `n ∣ m`. -/
+theorem Prime.dvd_of_prime_pow_eq_pow (hp : Prime p) (h : p ^ m = a ^ n) : n ∣ m := by
+  by_cases hn : n = 0
+  · subst hn
+    simp only [pow_zero] at h
+    by_cases hm : m = 0
+    · simp [hm]
+    · exact absurd (IsUnit.of_pow_eq_one h hm) hp.not_unit
+  have ha : a ≠ 0 := by
+    intro ha; rw [ha, zero_pow hn] at h
+    have h1 : emultiplicity p (p ^ m) = ⊤ := by rw [h]; exact emultiplicity_zero p
+    rw [emultiplicity_pow_self hp.ne_zero hp.not_unit] at h1
+    exact absurd h1 (ENat.coe_ne_top m)
+  exact ⟨multiplicity p a, hp.multiplicity_prime_pow_eq_pow h ha⟩
+
+/-- If `p` is prime, `n ≠ 0`, `p ^ m = a ^ n`, and the monoid is torsion-free,
+then `a = p ^ (m / n)`. -/
+theorem Prime.eq_prime_pow_of_prime_pow_eq_pow (hp : Prime p) [IsMulTorsionFree α]
+    (h : p ^ m = a ^ n) (hn : n ≠ 0) : a = p ^ (m / n) := by
+  have hdvd := hp.dvd_of_prime_pow_eq_pow h
+  conv_lhs at h => rw [show m = m / n * n from (Nat.div_mul_cancel hdvd).symm]
+  rw [pow_mul] at h
+  exact pow_left_injective hn h.symm
+
+/-- If `p` is prime, `n ≠ 0`, and `p ^ m = a ^ n`, then `∃ k, a = p ^ k`. -/
+theorem Prime.exists_eq_prime_pow_of_prime_pow_eq_pow (hp : Prime p) [IsMulTorsionFree α]
+    (h : p ^ m = a ^ n) (hn : n ≠ 0) : ∃ k, a = p ^ k :=
+  ⟨m / n, hp.eq_prime_pow_of_prime_pow_eq_pow h hn⟩
+
+end PrimePowEqPow
+
+/-! ## Coprime exponent roots in UFM -/
+
+section CoprimeExpRoots
+
+variable {α : Type*} [CommMonoidWithZero α] [UniqueFactorizationMonoid α] {a b : α} {m n : ℕ}
+
+open UniqueFactorizationMonoid
+
+/-- In a UFM, if `m.Coprime n` and `a ^ m = b ^ n` with `a, b ≠ 0`, then for every prime `q`,
+`n ∣ multiplicity q a`. -/
+theorem Nat.Coprime.dvd_multiplicity_of_pow_eq (hmn : Nat.Coprime m n) (h : a ^ m = b ^ n)
+    (ha : a ≠ 0) (hb : b ≠ 0) {q : α} (hq : Prime q) :
+    n ∣ multiplicity q a := by
+  have hfina : FiniteMultiplicity q a := FiniteMultiplicity.of_prime_left hq ha
+  have hfinb : FiniteMultiplicity q b := FiniteMultiplicity.of_prime_left hq hb
+  have heq : m * multiplicity q a = n * multiplicity q b := by
+    have h1 : (m * multiplicity q a : ℕ∞) = n * multiplicity q b := by
+      calc (m * multiplicity q a : ℕ∞)
+          = m * emultiplicity q a := by rw [hfina.emultiplicity_eq_multiplicity]
+        _ = emultiplicity q (a ^ m) := (emultiplicity_pow hq).symm
+        _ = emultiplicity q (b ^ n) := by rw [congr_arg (emultiplicity q) h]
+        _ = n * emultiplicity q b := emultiplicity_pow hq
+        _ = n * multiplicity q b := by rw [hfinb.emultiplicity_eq_multiplicity]
+    exact_mod_cast h1
+  exact hmn.symm.dvd_of_dvd_mul_left (Dvd.intro _ heq.symm)
+
+/-- In a UFM with trivial units, if `m.Coprime n` and `a ^ m = b ^ n` (both nonzero),
+then `∃ c, a = c ^ n ∧ b = c ^ m`. -/
+theorem exists_eq_pow_of_coprime_pow_eq [NormalizationMonoid α] [Subsingleton αˣ]
+    (hmn : Nat.Coprime m n) (h : a ^ m = b ^ n)
+    (ha : a ≠ 0) (hb : b ≠ 0) :
+    ∃ c : α, a = c ^ n ∧ b = c ^ m := by
+  -- Handle edge cases
+  by_cases hn : n = 0
+  · have hm : m = 1 := by
+      have := hmn; rwa [hn, Nat.Coprime, Nat.gcd_zero_right] at this
+    subst hn; subst hm; simp only [pow_one, pow_zero] at h ⊢; exact ⟨b, h, rfl⟩
+  by_cases hm : m = 0
+  · have hn1 : n = 1 := by
+      have := hmn; rwa [hm, Nat.Coprime, Nat.gcd_zero_left] at this
+    subst hm; subst hn1; simp only [pow_zero, pow_one] at h ⊢; exact ⟨a, rfl, h.symm⟩
+  classical
+  -- From a^m = b^n, we get m • normalizedFactors a = n • normalizedFactors b
+  have hfact : m • normalizedFactors a = n • normalizedFactors b := by
+    have heq := congr_arg normalizedFactors h
+    rwa [normalizedFactors_pow, normalizedFactors_pow] at heq
+  -- Helper: count equality from hfact
+  have hcount : ∀ p, m * (normalizedFactors a).count p = n * (normalizedFactors b).count p := by
+    intro p
+    have := congr_arg (Multiset.count p) hfact
+    rwa [Multiset.count_nsmul, Multiset.count_nsmul] at this
+  -- n divides all counts of normalizedFactors a
+  have hdvd : ∀ p, n ∣ (normalizedFactors a).count p := fun p =>
+    hmn.symm.dvd_of_dvd_mul_left (Dvd.intro _ (hcount p).symm)
+  -- m divides all counts of normalizedFactors b
+  have hdvd_b : ∀ p, m ∣ (normalizedFactors b).count p := fun p =>
+    hmn.dvd_of_dvd_mul_left (Dvd.intro _ (hcount p))
+  -- count_a / n = count_b / m
+  have hcount_eq : ∀ p, (normalizedFactors a).count p / n =
+      (normalizedFactors b).count p / m := by
+    intro p
+    obtain ⟨k, hk⟩ := hdvd p
+    obtain ⟨j, hj⟩ := hdvd_b p
+    rw [hk, hj, Nat.mul_div_cancel_left _ (Nat.pos_of_ne_zero hn),
+      Nat.mul_div_cancel_left _ (Nat.pos_of_ne_zero hm)]
+    have := hcount p
+    rw [hk, hj] at this
+    -- this : m * (n * k) = n * (m * j), want k = j
+    have hmn_pos := Nat.mul_pos (Nat.pos_of_ne_zero hm) (Nat.pos_of_ne_zero hn)
+    apply Nat.eq_of_mul_eq_mul_left hmn_pos
+    calc m * n * k = m * (n * k) := by rw [Nat.mul_assoc]
+      _ = n * (m * j) := this
+      _ = m * n * j := by rw [← Nat.mul_assoc, Nat.mul_comm n m]
+  -- Construct c via finprod
+  set c := ∏ᶠ p : α, p ^ ((normalizedFactors a).count p / n) with hc_def
+  -- Finite support
+  have hfin_supp : (Function.mulSupport fun p : α =>
+      p ^ ((normalizedFactors a).count p / n)).Finite := by
+    apply Set.Finite.subset (normalizedFactors a).toFinset.finite_toSet
+    intro p hp
+    simp only [Function.mem_mulSupport] at hp
+    simp only [Finset.mem_coe, Multiset.mem_toFinset]
+    by_contra h_nmem
+    exact hp (by rw [Multiset.count_eq_zero.mpr h_nmem, Nat.zero_div, pow_zero])
+  use c
+  constructor
+  · -- Show a = c ^ n
+    have ha_eq := finprod_pow_count_eq_of_subsingleton_units ha
+    have hcn : c ^ n = ∏ᶠ p : α, p ^ ((normalizedFactors a).count p / n * n) := by
+      rw [hc_def, finprod_pow hfin_supp]
+      congr 1; ext p; exact (pow_mul p _ n).symm
+    simp_rw [Nat.div_mul_cancel (hdvd _)] at hcn
+    exact hcn.symm ▸ ha_eq.symm
+  · -- Show b = c ^ m
+    have hb_eq := finprod_pow_count_eq_of_subsingleton_units hb
+    have hcm : c ^ m = ∏ᶠ p : α, p ^ ((normalizedFactors b).count p / m * m) := by
+      rw [hc_def, finprod_pow hfin_supp]
+      congr 1; ext p; rw [hcount_eq p]; exact (pow_mul p _ m).symm
+    simp_rw [Nat.div_mul_cancel (hdvd_b _)] at hcm
+    exact hcm.symm ▸ hb_eq.symm
+
+end CoprimeExpRoots
