@@ -10,6 +10,7 @@ public import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 public import Mathlib.Topology.MetricSpace.Holder
 public import Mathlib.Topology.MetricSpace.MetricSeparated
+import Mathlib.Topology.Order.AtTopBotIxx
 
 /-!
 # Hausdorff measure and metric (outer) measures
@@ -276,7 +277,7 @@ theorem mono_pre_nat (m : Set X → ℝ≥0∞) : Monotone fun k : ℕ => pre m 
 
 theorem tendsto_pre (m : Set X → ℝ≥0∞) (s : Set X) :
     Tendsto (fun r => pre m r s) (𝓝[>] 0) (𝓝 <| mkMetric' m s) := by
-  rw [← map_coe_Ioi_atBot, tendsto_map'_iff]
+  rw [← tendsto_comp_coe_Ioi_atBot]
   simp only [mkMetric', OuterMeasure.iSup_apply, iSup_subtype']
   exact tendsto_atBot_iSup fun r r' hr => mono_pre _ hr _
 
@@ -481,7 +482,7 @@ theorem mkMetric_apply (m : ℝ≥0∞ → ℝ≥0∞) (s : Set X) :
     congr 1 with n : 1
     simp only [iInf_eq_if, htr n, if_true]
   · rw [iInf_eq_if, if_neg htr]
-    push_neg at htr; rcases htr with ⟨n, hn⟩
+    push Not at htr; rcases htr with ⟨n, hn⟩
     refine ENNReal.tsum_eq_top_of_eq_top ⟨n, ?_⟩
     rw [iSup_eq_if, if_pos, iInf_eq_if, if_neg]
     · exact hn.not_ge
@@ -708,7 +709,8 @@ theorem hausdorffMeasure_image_le (h : HolderOnWith C r f s) (hr : 0 < r) {d : �
       intro hft
       simp only [Nonempty.mono ((t n).inter_subset_left) hft, ciSup_pos]
       rw [ENNReal.rpow_mul, ← ENNReal.mul_rpow_of_nonneg _ _ hd]
-      exact ENNReal.rpow_le_rpow (h.ediam_image_inter_le _) hd
+      gcongr
+      exact h.ediam_image_inter_le _
 
 end HolderOnWith
 
@@ -855,6 +857,11 @@ theorem hausdorffMeasure_smul {α : Type*} [SMul α X] [IsIsometricSMul α X] {d
   (isometry_smul X c).hausdorffMeasure_image h _
 
 @[to_additive]
+instance {α : Type*} [Group α] [MulAction α X] [IsIsometricSMul α X] {d : ℝ} :
+    SMulInvariantMeasure α X μH[d] where
+  measure_preimage_smul c _ _ := (IsometryEquiv.constSMul c).hausdorffMeasure_preimage _ _
+
+@[to_additive]
 instance {d : ℝ} [Group X] [IsIsometricSMul X X] : IsMulLeftInvariant (μH[d] : Measure X) where
   map_mul_left_eq_self x := (IsometryEquiv.constSMul x).map_hausdorffMeasure _
 
@@ -948,7 +955,7 @@ theorem hausdorffMeasure_pi_real {ι : Type*} [Fintype ι] :
     _ = ∏ i : ι, volume (Ioo (a i : ℝ) (b i)) := by
       simp only [Real.volume_Ioo]
       apply Tendsto.liminf_eq
-      refine ENNReal.tendsto_finset_prod_of_ne_top _ (fun i _ => ?_) fun i _ => ?_
+      refine ENNReal.tendsto_finsetProd_of_ne_top _ (fun i _ => ?_) fun i _ => ?_
       · apply
           Tendsto.congr' _
             ((ENNReal.continuous_ofReal.tendsto _).comp

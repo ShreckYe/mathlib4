@@ -46,7 +46,7 @@ Note that a group `G` with Haar measure that is both left and right invariant is
 **unimodular**.
 -/
 
-@[expose] public section
+public section
 
 open Set MeasureTheory TopologicalSpace MeasureTheory.Measure
 
@@ -60,8 +60,6 @@ section
 instance QuotientGroup.measurableSMul {G : Type*} [Group G] {Γ : Subgroup G} [MeasurableSpace G]
     [TopologicalSpace G] [IsTopologicalGroup G] [BorelSpace G] [BorelSpace (G ⧸ Γ)] :
     MeasurableSMul G (G ⧸ Γ) where
-  measurable_const_smul g := (continuous_const_smul g).measurable
-  measurable_smul_const _ := (continuous_id.smul continuous_const).measurable
 
 end
 
@@ -297,11 +295,7 @@ theorem IsFundamentalDomain.QuotientMeasureEqMeasurePreimage_smulHaarMeasure {�
     QuotientMeasureEqMeasurePreimage ν
       ((ν ((π ⁻¹' (K : Set (G ⧸ Γ))) ∩ 𝓕)) • haarMeasure K) := by
   set c := ν ((π ⁻¹' (K : Set (G ⧸ Γ))) ∩ 𝓕)
-  have c_ne_top : c ≠ ∞ := by
-    contrapose! h𝓕_finite
-    have : c ≤ ν 𝓕 := measure_mono (Set.inter_subset_right)
-    rw [h𝓕_finite] at this
-    exact top_unique this
+  have c_ne_top : c ≠ ∞ := measure_inter_ne_top_of_right_ne_top h𝓕_finite
   set μ := c • haarMeasure K
   have hμK : μ K = c := by simp [μ, haarMeasure_self]
   haveI : SigmaFinite μ := by
@@ -455,7 +449,7 @@ lemma QuotientAddGroup.integral_mul_eq_integral_automorphize_mul {K : Type*} [No
   let π : G' → G' ⧸ Γ' := QuotientAddGroup.mk
   have meas_π : Measurable π := continuous_quotient_mk'.measurable
   have H₀ : QuotientAddGroup.automorphize ((g ∘ π) * f) = g * (QuotientAddGroup.automorphize f) :=
-    by exact QuotientAddGroup.automorphize_smul_left f g
+    QuotientAddGroup.automorphize_smul_left f g
   calc ∫ (x : G'), g (π x) * f x ∂μ' =
     ∫ (x : G' ⧸ Γ'), QuotientAddGroup.automorphize ((g ∘ π) * f) x ∂μ_𝓕 := ?_
     _ = ∫ (x : G' ⧸ Γ'), g x * (QuotientAddGroup.automorphize f x) ∂μ_𝓕 := by simp [H₀]
