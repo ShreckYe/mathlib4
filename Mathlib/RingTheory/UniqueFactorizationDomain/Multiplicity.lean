@@ -176,4 +176,78 @@ lemma pow_dvd_pow_iff_dvd {a b : R} {n : ℕ} (hn : n ≠ 0) : a ^ n ∣ b ^ n �
   rwa [emultiplicity_pow hp, emultiplicity_pow hp,
     ENat.mul_le_mul_left_iff (by exact_mod_cast hn) (ENat.coe_ne_top _)] at this
 
+/-- In a UFM, if `a ^ m = b ^ n` and `m.Coprime n`, then there exists `c` such that
+`a` is associated to `c ^ n` and `b` is associated to `c ^ m`. -/
+theorem exists_associated_pow_of_coprime_of_pow_eq_pow [NormalizationMonoid R] [DecidableEq R]
+    {a b : R} {m n : ℕ}
+    (hmn : m.Coprime n) (h : a ^ m = b ^ n) (ha : a ≠ 0) (hb : b ≠ 0) :
+    ∃ c : R, Associated a (c ^ n) ∧ Associated b (c ^ m) := by
+  -- From a^m = b^n, normalizedFactors satisfy m • nf(a) = n • nf(b)
+  have hnf : m • normalizedFactors a = n • normalizedFactors b := by
+    have heq : Associated (a ^ m) (b ^ n) := by rw [h]
+    have := (associated_iff_normalizedFactors_eq_normalizedFactors
+      (pow_ne_zero m ha) (pow_ne_zero n hb)).mp heq
+    rwa [normalizedFactors_pow, normalizedFactors_pow] at this
+  -- For each prime p, n ∣ count(p, nf(a)) by coprimality
+  have hdvd_n : ∀ p, n ∣ (normalizedFactors a).count p := by
+    intro p
+    have hcount : m * (normalizedFactors a).count p = n * (normalizedFactors b).count p := by
+      have := congr_arg (Multiset.count p) hnf
+      simp [Multiset.count_nsmul] at this; exact this
+    exact hmn.symm.dvd_of_dvd_mul_left ⟨_, hcount⟩
+  -- Handle trivial case n = 0
+  rcases eq_or_ne n 0 with rfl | hn
+  · simp [Nat.Coprime, Nat.gcd_zero_right] at hmn
+    subst hmn; simp at h; exact ⟨b, by simp [h], by simp⟩
+  -- Handle trivial case m = 0
+  rcases eq_or_ne m 0 with rfl | hm
+  · simp [Nat.Coprime, Nat.gcd_zero_left] at hmn
+    subst hmn; simp at h; exact ⟨a, by simp, by simp [h]⟩
+  -- Construct S with n • S = normalizedFactors a
+  set S : Multiset R := (normalizedFactors a).dedup.bind
+    (fun p => Multiset.replicate ((normalizedFactors a).count p / n) p)
+  have hS : n • S = normalizedFactors a := by
+    ext p
+    simp only [S, Multiset.count_nsmul, Multiset.count_bind, Multiset.count_replicate]
+    -- The map/sum over dedup is a Finset sum
+    change n * (∑ x ∈ (normalizedFactors a).toFinset,
+      (if x = p then (normalizedFactors a).count x / n else 0)) = _
+    rw [Finset.sum_eq_single p (fun q _ hqp => by simp [hqp])
+      (fun hp => by simp [Multiset.mem_toFinset.not.mp hp])]
+    simp [Nat.mul_div_cancel' (hdvd_n p)]
+  -- S consists of normalized irreducibles
+  have hS_irred : ∀ p ∈ S, Irreducible p := by
+    intro p hp
+    have : p ∈ normalizedFactors a := by rw [← hS]; exact Multiset.mem_nsmul.mpr ⟨hn, hp⟩
+    exact irreducible_of_normalized_factor p this
+  have hS_norm : ∀ p ∈ S, normalize p = p := by
+    intro p hp
+    have : p ∈ normalizedFactors a := by rw [← hS]; exact Multiset.mem_nsmul.mpr ⟨hn, hp⟩
+    exact normalize_normalized_factor p this
+  -- S.prod ≠ 0
+  have hS_prod_ne : S.prod ≠ 0 := by
+    intro h0
+    have : (n • S).prod = S.prod ^ n := Multiset.prod_nsmul S n
+    rw [hS, h0, zero_pow hn] at this
+    exact ((prod_normalizedFactors ha).ne_zero_iff.mpr ha) this
+  -- normalizedFactors(S.prod) = S
+  have hnf_S : normalizedFactors S.prod = S := by
+    have h1 := normalizedFactors_prod_eq S hS_irred
+    rwa [show Multiset.map normalize S = S from
+      (Multiset.map_congr rfl hS_norm).trans (Multiset.map_id S)] at h1
+  use S.prod
+  constructor
+  · rw [associated_iff_normalizedFactors_eq_normalizedFactors ha (pow_ne_zero n hS_prod_ne)]
+    rw [normalizedFactors_pow, hnf_S, hS]
+  · rw [associated_iff_normalizedFactors_eq_normalizedFactors hb (pow_ne_zero m hS_prod_ne)]
+    rw [normalizedFactors_pow, hnf_S]
+    have key : n • (m • S) = n • normalizedFactors b := by
+      calc n • (m • S)
+          _ = (m * n) • S := (mul_nsmul S m n).symm
+          _ = (n * m) • S := by rw [Nat.mul_comm]
+          _ = m • (n • S) := mul_nsmul S n m
+          _ = m • normalizedFactors a := by rw [hS]
+          _ = n • normalizedFactors b := hnf
+    exact ((nsmul_right_inj hn).mp key).symm
+
 end UniqueFactorizationMonoid

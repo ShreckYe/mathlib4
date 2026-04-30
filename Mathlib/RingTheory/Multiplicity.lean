@@ -738,6 +738,46 @@ theorem multiplicity_pow_self_of_prime {p : α} (hp : Prime p) (n : ℕ) :
     multiplicity p (p ^ n) = n :=
   multiplicity_pow_self hp.ne_zero hp.not_unit n
 
+/-- If `p` is prime and `p ^ m = a ^ n`, then `n ∣ m`. -/
+theorem Prime.dvd_of_pow_eq_pow {p a : α} {m n : ℕ} (hp : Prime p) (h : p ^ m = a ^ n) :
+    n ∣ m := by
+  have key : (m : ℕ∞) = n * emultiplicity p a := by
+    have := congr_arg (emultiplicity p) h
+    rwa [emultiplicity_pow_self_of_prime hp, emultiplicity_pow hp] at this
+  rcases eq_or_ne n 0 with rfl | hn
+  · simp at key; omega
+  · have hfin : emultiplicity p a ≠ ⊤ := by
+      intro htop
+      simp [htop, ENat.mul_top (show (n : ℕ∞) ≠ 0 from Nat.cast_ne_zero.mpr hn)] at key
+    lift emultiplicity p a to ℕ using hfin with k hk
+    have key' : m = n * k := by exact_mod_cast key
+    exact ⟨k, key'⟩
+
+/-- If `p` is prime, `p ^ m = a ^ n`, and `n ≠ 0`, then `a` is associated to a power of `p`. -/
+theorem Prime.exists_associated_pow_of_pow_eq_pow {p a : α} {m n : ℕ}
+    (hp : Prime p) (hn : n ≠ 0) (h : p ^ m = a ^ n) :
+    ∃ k, Associated a (p ^ k) := by
+  suffices ∀ m (a : α), p ^ m = a ^ n → ∃ k, Associated a (p ^ k) from this m a h
+  intro m
+  induction m using Nat.strongRecOn with | ind m ih =>
+  intro a h
+  by_cases hm : m = 0
+  · subst hm
+    rw [pow_zero] at h
+    exact ⟨0, by rw [pow_zero]
+                 exact associated_one_iff_isUnit.mpr (IsUnit.of_pow_eq_one h.symm hn)⟩
+  · have hpa : p ∣ a := hp.dvd_of_dvd_pow (h ▸ dvd_pow_self p hm)
+    obtain ⟨b, rfl⟩ := hpa
+    rw [mul_pow] at h
+    have hnm : n ≤ m :=
+      (pow_dvd_pow_iff hp.ne_zero hp.not_unit).mp ⟨b ^ n, h⟩
+    have hcancel : p ^ (m - n) = b ^ n := by
+      apply mul_left_cancel₀ (pow_ne_zero n hp.ne_zero)
+      rw [← pow_add, Nat.add_sub_cancel' hnm, h]
+    have hlt : m - n < m := Nat.sub_lt (Nat.pos_of_ne_zero hm) (Nat.pos_of_ne_zero hn)
+    obtain ⟨k, hk⟩ := ih (m - n) hlt b hcancel
+    exact ⟨k + 1, (pow_succ' p k ▸ Associated.mul_left p hk)⟩
+
 end CancelCommMonoidWithZero
 
 section Nat
